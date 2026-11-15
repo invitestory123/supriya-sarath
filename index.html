@@ -150,6 +150,19 @@
       #bgmAudioBtn.bgm-playing #bgmIconPlay {
         animation: bgmDiskSpin 6s linear infinite;
       }
+      #bgmAudioBtn:not(.bgm-playing) {
+        animation: bgmAttention 2.4s ease-in-out infinite;
+      }
+      @keyframes bgmAttention {
+        0%, 100% {
+          box-shadow: 0 4px 18px rgba(70, 57, 44, 0.16), 0 0 12px rgba(196, 151, 82, 0.28);
+          transform: scale(1);
+        }
+        50% {
+          box-shadow: 0 6px 24px rgba(196, 151, 82, 0.5), 0 0 16px rgba(196, 151, 82, 0.4);
+          transform: scale(1.06);
+        }
+      }
       @keyframes bgmDiskSpin {
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
@@ -175,7 +188,7 @@
     </button>
 
     <!-- Background Music Audio -->
-    <audio id="weddingBgAudio" loop preload="auto" playsinline>
+    <audio id="weddingBgAudio" autoplay loop preload="auto" playsinline src="./editable/assets/bgm.mp3">
       <source src="./editable/assets/bgm.mp3" type="audio/mpeg" />
     </audio>
 
@@ -272,12 +285,15 @@
         var btn = document.getElementById("bgmAudioBtn");
         var iconPlay = document.getElementById("bgmIconPlay");
         var iconMuted = document.getElementById("bgmIconMuted");
-        var hasUserInteracted = false;
 
         if (!audio || !btn) return;
 
+        var userManuallyPaused = false;
+        var isUnlocked = false;
+
+        // Apply audio settings from WEDDING_DATA
         var bgmConfig = (window.WEDDING_DATA && window.WEDDING_DATA.bgm) || {};
-        if (bgmConfig.src) {
+        if (bgmConfig.src && audio.getAttribute("src") !== bgmConfig.src) {
           audio.src = bgmConfig.src;
         }
         if (typeof bgmConfig.volume === "number" && bgmConfig.volume >= 0 && bgmConfig.volume <= 1) {
@@ -290,26 +306,50 @@
         }
 
         function updateUI(isPlaying) {
-          iconPlay.style.display = isPlaying ? "block" : "none";
-          iconMuted.style.display = isPlaying ? "none" : "block";
+          if (iconPlay && iconMuted) {
+            iconPlay.style.display = isPlaying ? "block" : "none";
+            iconMuted.style.display = isPlaying ? "none" : "block";
+          }
           btn.classList.toggle("bgm-playing", isPlaying);
           btn.setAttribute("aria-pressed", isPlaying ? "true" : "false");
           btn.setAttribute("aria-label", isPlaying ? "Pause background music" : "Play background music");
         }
 
+        function primeWebAudio() {
+          try {
+            var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass && !window.__bgmAudioCtx) {
+              window.__bgmAudioCtx = new AudioContextClass();
+            }
+            if (window.__bgmAudioCtx && window.__bgmAudioCtx.state === "suspended") {
+              window.__bgmAudioCtx.resume();
+            }
+          } catch (e) {}
+        }
+
         function playMusic() {
+          if (userManuallyPaused) return;
+          primeWebAudio();
           audio.muted = false;
           var promise = audio.play();
           if (promise !== undefined) {
             promise
               .then(function () {
+                isUnlocked = true;
                 updateUI(true);
+                removeUnlockListeners();
               })
               .catch(function () {
+                // Autoplay blocked by browser policy without user gesture yet
                 updateUI(false);
+                // Keep unlock listeners actively waiting for first touch/click
               });
           } else {
-            updateUI(!audio.paused);
+            if (!audio.paused) {
+              isUnlocked = true;
+              updateUI(true);
+              removeUnlockListeners();
+            }
           }
         }
 
@@ -318,59 +358,127 @@
           updateUI(false);
         }
 
-        function cleanupUnlockListeners() {
-          window.removeEventListener("click", unlockAudio, true);
-          window.removeEventListener("touchstart", unlockAudio, true);
-          window.removeEventListener("scroll", unlockAudio, true);
-          window.removeEventListener("keydown", unlockAudio, true);
-        }
+        var unlockEvents = [
+          "pointerdown",
+          "touchstart",
+          "touchend",
+          "click",
+          "mousedown",
+          "keydown"
+        ];
 
-        function unlockAudio(e) {
-          if (hasUserInteracted) return;
-          hasUserInteracted = true;
-          cleanupUnlockListeners();
-          if (e && e.target && (btn.contains(e.target) || (document.getElementById("langToggleBtn") && document.getElementById("langToggleBtn").contains(e.target)))) {
+        function onUserGesture(e) {
+          if (userManuallyPaused) return;
+          // If the user tapped directly on the floating audio button or language switch button, let their click handler handle it
+          if (e && e.target) {
+            if (btn.contains(e.target)) return;
+            var langBtn = document.getElementById("langToggleBtn");
+            if (langBtn && langBtn.contains(e.target)) return;
+          }
+          if (!audio.paused) {
+            isUnlocked = true;
+            removeUnlockListeners();
             return;
           }
-          if (audio.paused) {
-            playMusic();
-          }
+          playMusic();
         }
 
+        function attachUnlockListeners() {
+          unlockEvents.forEach(function (eventName) {
+            try {
+              window.addEventListener(eventName, onUserGesture, { capture: true, passive: true });
+              document.addEventListener(eventName, onUserGesture, { capture: true, passive: true });
+            } catch (e) {
+              try {
+                window.addEventListener(eventName, onUserGesture, true);
+              } catch (err) {}
+            }
+          });
+        }
+
+        function removeUnlockListeners() {
+          unlockEvents.forEach(function (eventName) {
+            try {
+              window.removeEventListener(eventName, onUserGesture, { capture: true, passive: true });
+              document.removeEventListener(eventName, onUserGesture, { capture: true, passive: true });
+            } catch (e) {
+              try {
+                window.removeEventListener(eventName, onUserGesture, true);
+              } catch (err) {}
+            }
+          });
+        }
+
+        // Button Click Handler
         btn.addEventListener("click", function (e) {
           e.stopPropagation();
-          hasUserInteracted = true;
-          cleanupUnlockListeners();
           if (audio.paused) {
+            userManuallyPaused = false;
             playMusic();
           } else {
+            userManuallyPaused = true;
             pauseMusic();
           }
         });
 
         audio.addEventListener("play", function () {
           updateUI(true);
+          isUnlocked = true;
+          removeUnlockListeners();
         });
         audio.addEventListener("pause", function () {
           updateUI(false);
         });
+        audio.addEventListener("ended", function () {
+          if (audio.loop) {
+            playMusic();
+          } else {
+            updateUI(false);
+          }
+        });
 
-        window.addEventListener("click", unlockAudio, true);
-        window.addEventListener("touchstart", unlockAudio, true);
-        window.addEventListener("scroll", unlockAudio, true);
-        window.addEventListener("keydown", unlockAudio, true);
+        // Register unlock listeners for immediate capture on first gesture
+        attachUnlockListeners();
 
-        // Resume audio if it was playing before language switch
+        // 1. Try immediate unmuted play right away
+        playMusic();
+
+        // 2. Try on DOMContentLoaded
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", function () {
+            if (audio.paused) playMusic();
+          });
+        }
+
+        // 3. Try on window load
+        window.addEventListener("load", function () {
+          if (audio.paused) playMusic();
+        });
+
+        // 4. Try on pageshow (e.g., navigating back/forward or mobile app webview resume)
+        window.addEventListener("pageshow", function () {
+          if (audio.paused) playMusic();
+        });
+
+        // 5. Try on WeChat / in-app webviews
+        document.addEventListener("WeixinJSBridgeReady", function () {
+          if (audio.paused) playMusic();
+        });
+
+        // 6. When tab becomes visible again, ensure music keeps playing if not paused by user
+        document.addEventListener("visibilitychange", function () {
+          if (!document.hidden && !userManuallyPaused && audio.paused && isUnlocked) {
+            playMusic();
+          }
+        });
+
+        // 7. Check if music should resume after language switch
         try {
           var shouldResume = sessionStorage.getItem("bgm_should_play");
           if (shouldResume === "true") {
             playMusic();
-          } else {
-            playMusic();
           }
-        } catch(e) {
-          playMusic();
-        }
+        } catch (e) {}
       })();
     </script>
   </body>
