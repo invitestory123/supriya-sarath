@@ -168,8 +168,7 @@
     <button
       id="langToggleBtn"
       type="button"
-      aria-label="Translate to Telugu"
-      title="Translate into Telugu / ఇంగ్లీష్"
+      aria-label="Toggle language"
     >
       <span class="lang-globe-icon" aria-hidden="true">🌐</span>
       <span id="langBtnText">తెలుగు</span>
@@ -196,204 +195,50 @@
       </svg>
     </button>
 
-    <!-- Language Translation Controller -->
+    <!-- Language & Audio Script -->
     <script>
       (function () {
-        var PHRASE_PAIRS = [
-          // Bible Verse
-          ["“Therefore what God has joined together, let no one separate.”", "“కాబట్టి దేవుడు జతపరచినవారిని మనుష్యుడు వేరుపరచకూడదు.”"],
-          ["Therefore what God has joined together, let no one separate.", "కాబట్టి దేవుడు జతపరచినవారిని మనుష్యుడు వేరుపరచకూడదు."],
-          ["MARK 10:9", "మార్కు 10:9"],
-          ["Mark 10:9", "మార్కు 10:9"],
+        var isTelugu = window.CURRENT_INVITATION_LANG === "te";
+        document.documentElement.setAttribute("data-lang", isTelugu ? "te" : "en");
 
-          // Hero Section
-          ["Save the Date", "శుభ వివాహం"],
-          ["Save The Date", "శుభ వివాహం"],
-          ["SAVE THE DATE", "శుభ వివాహం"],
-          ["Two souls, one beautiful journey.\nForever begins now.", "రెండు మనసులు, ఒకే పవిత్ర బంధం.\nశాశ్వతమైన నూతన జీవన ప్రయాణం."],
-          ["Two souls, one beautiful journey.", "రెండు మనసులు, ఒకే పవిత్ర బంధం."],
-          ["Forever begins now.", "శాశ్వతమైన నూతన జీవన ప్రయాణం."],
-
-          // Couple Names
-          ["Supriya & Sarath", "సుప్రియ & శరత్"],
-          ["Supriya", "సుప్రియ"],
-          ["Sarath", "శరత్"],
-
-          // Countdown Section
-          ["Counting the moments", "ముహూర్త సమయం"],
-          ["Until we say I do", "వివాహ మహోత్సవానికి ఇంకా..."],
-          ["Days", "రోజులు"],
-          ["Hours", "గంటలు"],
-          ["Minutes", "నిమిషాలు"],
-          ["Seconds", "సెకన్లు"],
-          ["Monday, November 30th, 2026", "సోమవారం, 30 నవంబర్ 2026"],
-
-          // Wedding Events Itinerary
-          ["Wedding Events", "వివాహ వేడుకలు"],
-          ["The Road to Forever", "సంతోషకరమైన శుభకార్యాలు"],
-          ["The road to forever", "సంతోషకరమైన శుభకార్యాలు"],
-          ["Our Story", "వివాహ వేడుకలు"],
-          ["PELLIKODUKU", "పెళ్లికొడుకు"],
-          ["Pellikoduku", "పెళ్లికొడుకు"],
-          ["Location: At Our Residence", "వేదిక: మా నివాసంలో"],
-          ["25th November 2026", "25 నవంబర్ 2026"],
-
-          ["HALDI", "హల్దీ వేడుక"],
-          ["Haldi", "హల్దీ వేడుక"],
-          ["Time: From Morning\nLocation: Horizontal Villas, Rjy", "సమయం: ఉదయం నుండి\nవేదిక: హారిజాంటల్ విల్లాస్, రాజమహేంద్రవరం"],
-          ["Time: From Morning", "సమయం: ఉదయం నుండి"],
-          ["Location: Horizontal Villas, Rjy", "వేదిక: హారిజాంటల్ విల్లాస్, రాజమహేంద్రవరం"],
-          ["27th November 2026", "27 నవంబర్ 2026"],
-
-          ["SANGEETH", "సంగీత్"],
-          ["Sangeeth", "సంగీత్"],
-          ["Time: From Evening\nLocation: Horizontal Villas, Rjy", "సమయం: సాయంత్రం నుండి\nవేదిక: హారిజాంటల్ విల్లాస్, రాజమహేంద్రవరం"],
-          ["Time: From Evening", "సమయం: సాయంత్రం నుండి"],
-
-          ["WEDDING", "పరిశుద్ధ వివాహం"],
-          ["Wedding", "పరిశుద్ధ వివాహం"],
-          ["Time: Starts from 10:00 AM\nLocation: Surya Gardens, Rajamahendravaram", "సమయం: ఉదయం 10:00 గంటల నుండి\nవేదిక: సూర్య గార్డెన్స్, రాజమహేంద్రవరం"],
-          ["Time: Starts from 10:00 AM", "సమయం: ఉదయం 10:00 గంటల నుండి"],
-          ["Location: Surya Gardens, Rajamahendravaram", "వేదిక: సూర్య గార్డెన్స్, రాజమహేంద్రవరం"],
-          ["30th November 2026", "30 నవంబర్ 2026"],
-
-          // Details Section
-          ["Wedding Details", "వివాహ వివరాలు"],
-          ["When & where", "సమయం & వేదిక"],
-          ["The Wedding Ceremony", "పరిశుద్ధ వివాహ మహోత్సవం"],
-          ["Starts from 10:00 AM", "ఉదయం 10:00 గంటల నుండి"],
-          ["We warmly invite you to join us and shower your blessings", "మా వివాహ వేడుకకు విచ్చేసి నూతన వధూవరులను ఆశీర్వదించగలరని మనస్ఫూర్తిగా కోరుచున్నాము"],
-          ["Traditional / Festive Formal", "సంప్రదాయ వస్త్రధారణ"],
-
-          // Venue Section
-          ["The Venue", "కళ్యాణ వేదిక"],
-          ["Find your way to us", "దారి వివరాలు"],
-          ["Surya Gardens", "సూర్య గార్డెన్స్"],
-          ["85-37-8, Jawaharlal Nehru Rd, Gandhipuram, Rajamahendravaram, Andhra Pradesh 533103", "85-37-8, జవహర్‌లాల్ నెహ్రూ రోడ్, గాంధీపురం, రాజమహేంద్రవరం, ఆంధ్రప్రదేశ్ 533103"],
-          ["Open in Maps", "మ్యాప్స్‌లో చూడండి"],
-
-          // Gallery Section
-          ["Gallery", "ఫోటో గ్యాలరీ"],
-          ["Moments we keep", "మధుర జ్ఞాపకాలు"],
-
-          // Families Section
-          ["With love, our families", "కుటుంబ సభ్యుల ప్రేమతో"],
-          ["The ones who raised us", "మా పెద్దల ఆశీస్సులు"],
-          ["The Bride's Family", "వధువు కుటుంబం"],
-          ["Supriya's Family", "సుప్రియ కుటుంబం"],
-          ["Family of Supriya", "సుప్రియ కుటుంబ సభ్యులు"],
-          ["Bride's Family", "వధువు కుటుంబం"],
-          ["The Groom's Family", "వరుని కుటుంబం"],
-          ["Sarath's Family", "శరత్ కుటుంబం"],
-          ["Family of Sarath", "శరత్ కుటుంబ సభ్యులు"],
-          ["Groom's Family", "వరుని కుటుంబం"],
-          ["With Best Compliments", "ఆత్మీయులు & బంధుమిత్రులు"],
-          ["Near & Dear", "సదా మీ ఆశీస్సులతో"],
-
-          // Calendar Section
-          ["Add to your calendar so you don't miss a moment.", "మా వివాహ వేడుకను మీ క్యాలెండర్‌లో జోడించుకోండి."],
-          ["Google Calendar", "గూగుల్ క్యాలెండర్"],
-          ["Apple Calendar", "యాపిల్ క్యాలెండర్"],
-
-          // Footer Section
-          ["Thank you for celebrating with us", "మా ఆనందంలో పాలుపంచుకున్నందుకు ధన్యవాదాలు"],
-          ["© 2026 Supriya & Sarath · Handcrafted with love by InviteStory", "© 2026 సుప్రియ & శరత్ · హ్యాండ్‌క్రాఫ్టెడ్ విత్ లవ్ బై InviteStory"]
-        ];
-
-        var currentLang = "en";
-        var isTranslating = false;
-
-        function translateNode(node, toLang) {
-          if (node.nodeType === Node.TEXT_NODE) {
-            var text = node.nodeValue;
-            if (!text || !text.trim()) return;
-
-            // Direct match
-            for (var i = 0; i < PHRASE_PAIRS.length; i++) {
-              var pair = PHRASE_PAIRS[i];
-              var fromStr = toLang === "te" ? pair[0] : pair[1];
-              var toStr = toLang === "te" ? pair[1] : pair[0];
-
-              if (text.trim() === fromStr) {
-                node.nodeValue = text.replace(fromStr, toStr);
-                return;
-              }
-            }
-
-            // Substring replacement
-            for (var j = 0; j < PHRASE_PAIRS.length; j++) {
-              var p = PHRASE_PAIRS[j];
-              var f = toLang === "te" ? p[0] : p[1];
-              var t = toLang === "te" ? p[1] : p[0];
-              if (text.indexOf(f) !== -1) {
-                text = text.split(f).join(t);
-              }
-            }
-            node.nodeValue = text;
-          } else if (node.nodeType === Node.ELEMENT_NODE) {
-            if (
-              node.tagName === "SCRIPT" ||
-              node.tagName === "STYLE" ||
-              node.tagName === "AUDIO" ||
-              node.id === "langToggleBtn" ||
-              node.id === "bottomLangToggleBtn"
-            ) {
-              return;
-            }
-            for (var k = 0; k < node.childNodes.length; k++) {
-              translateNode(node.childNodes[k], toLang);
-            }
-          }
+        // Set initial Top Button text
+        var topBtnText = document.getElementById("langBtnText");
+        var topBtn = document.getElementById("langToggleBtn");
+        if (topBtnText && topBtn) {
+          topBtnText.textContent = isTelugu ? "English" : "తెలుగు";
+          topBtn.title = isTelugu ? "Switch to English" : "Translate into Telugu";
+          topBtn.setAttribute("aria-label", isTelugu ? "Switch to English" : "Translate to Telugu");
         }
 
-        function setLanguage(lang) {
-          isTranslating = true;
-          currentLang = lang;
-          document.documentElement.setAttribute("data-lang", lang);
-
-          var root = document.getElementById("root");
-          if (root) {
-            translateNode(root, lang);
-          }
-
-          var topBtnText = document.getElementById("langBtnText");
-          var topBtn = document.getElementById("langToggleBtn");
-          var bottomBtnText = document.getElementById("bottomLangBtnText");
-
-          if (lang === "te") {
-            if (topBtnText) topBtnText.textContent = "English";
-            if (topBtn) {
-              topBtn.title = "Switch back to English";
-              topBtn.setAttribute("aria-label", "Switch to English");
-            }
-            if (bottomBtnText) bottomBtnText.textContent = "English లో చదవండి (Switch to English)";
-          } else {
-            if (topBtnText) topBtnText.textContent = "తెలుగు";
-            if (topBtn) {
-              topBtn.title = "Translate into Telugu";
-              topBtn.setAttribute("aria-label", "Translate to Telugu");
-            }
-            if (bottomBtnText) bottomBtnText.textContent = "తెలుగులో చదవండి (Read in Telugu)";
-          }
-
+        // Toggle Language Handler
+        window.toggleInvitationLanguage = function () {
+          var nextLang = isTelugu ? "en" : "te";
           try {
-            localStorage.setItem("supriya_sarath_lang", lang);
+            localStorage.setItem("supriya_sarath_lang", nextLang);
+
+            // Remember audio playing state
+            var audio = document.getElementById("weddingBgAudio");
+            if (audio && !audio.paused) {
+              sessionStorage.setItem("bgm_should_play", "true");
+            } else {
+              sessionStorage.setItem("bgm_should_play", "false");
+            }
           } catch (e) {}
 
-          setTimeout(function () {
-            isTranslating = false;
-          }, 60);
-        }
+          var url = new URL(window.location.href);
+          if (nextLang === "te") {
+            url.searchParams.set("lang", "te");
+          } else {
+            url.searchParams.delete("lang");
+          }
+          window.location.replace(url.toString());
+        };
 
-        // Attach Top Toggle Button Click
-        var topBtn = document.getElementById("langToggleBtn");
         if (topBtn) {
-          topBtn.addEventListener("click", function () {
-            setLanguage(currentLang === "en" ? "te" : "en");
-          });
+          topBtn.addEventListener("click", window.toggleInvitationLanguage);
         }
 
-        // Dynamic Bottom Toggle Injection into Footer
+        // Inject Bottom Language Toggle Button into Footer
         function injectBottomLangButton() {
           var footerDiv = document.querySelector("footer .relative.z-10");
           if (footerDiv && !document.getElementById("bottomLangToggleBtn")) {
@@ -401,62 +246,22 @@
             container.className = "mt-4 mb-2";
             container.innerHTML =
               '<button id="bottomLangToggleBtn" type="button" class="bottom-lang-pill"><span aria-hidden="true">🌐</span> <span id="bottomLangBtnText">' +
-              (currentLang === "te"
-                ? "English లో చదవండి (Switch to English)"
+              (isTelugu
+                ? "English లో చూడండి (Switch to English)"
                 : "తెలుగులో చదవండి (Read in Telugu)") +
               "</span></button>";
             footerDiv.appendChild(container);
 
             document
               .getElementById("bottomLangToggleBtn")
-              .addEventListener("click", function () {
-                setLanguage(currentLang === "en" ? "te" : "en");
-              });
+              .addEventListener("click", window.toggleInvitationLanguage);
           }
         }
 
-        // Mutation Observer for dynamic elements (Countdown seconds, React re-renders)
-        var observer = new MutationObserver(function (mutations) {
-          if (isTranslating || currentLang !== "te") return;
-          for (var m = 0; m < mutations.length; m++) {
-            var mutation = mutations[m];
-            if (mutation.type === "childList") {
-              for (var a = 0; a < mutation.addedNodes.length; a++) {
-                translateNode(mutation.addedNodes[a], "te");
-              }
-            } else if (mutation.type === "characterData") {
-              translateNode(mutation.target, "te");
-            }
-          }
-        });
-
-        // Initialize on load
         window.addEventListener("DOMContentLoaded", function () {
-          var rootEl = document.getElementById("root");
-          if (rootEl) {
-            observer.observe(rootEl, { childList: true, subtree: true, characterData: true });
-          }
-
-          // Check URL query parameter or localStorage
-          var urlParams = new URLSearchParams(window.location.search);
-          var savedLang = urlParams.get("lang") || (function () {
-            try { return localStorage.getItem("supriya_sarath_lang"); } catch (e) { return null; }
-          })();
-
-          // Wait slightly for React to mount, then check language and inject bottom button
-          setTimeout(function () {
-            injectBottomLangButton();
-            if (savedLang === "te") {
-              setLanguage("te");
-            }
-          }, 350);
-
-          // Retry bottom injection after 1.2s to ensure React root is fully rendered
+          setTimeout(injectBottomLangButton, 350);
           setTimeout(injectBottomLangButton, 1200);
         });
-
-        // Expose global controller
-        window.setInvitationLanguage = setLanguage;
       })();
     </script>
 
@@ -524,7 +329,7 @@
           if (hasUserInteracted) return;
           hasUserInteracted = true;
           cleanupUnlockListeners();
-          if (e && e.target && btn.contains(e.target)) {
+          if (e && e.target && (btn.contains(e.target) || (document.getElementById("langToggleBtn") && document.getElementById("langToggleBtn").contains(e.target)))) {
             return;
           }
           if (audio.paused) {
@@ -555,8 +360,17 @@
         window.addEventListener("scroll", unlockAudio, true);
         window.addEventListener("keydown", unlockAudio, true);
 
-        // Attempt initial autoplay
-        playMusic();
+        // Resume audio if it was playing before language switch
+        try {
+          var shouldResume = sessionStorage.getItem("bgm_should_play");
+          if (shouldResume === "true") {
+            playMusic();
+          } else {
+            playMusic();
+          }
+        } catch(e) {
+          playMusic();
+        }
       })();
     </script>
   </body>
