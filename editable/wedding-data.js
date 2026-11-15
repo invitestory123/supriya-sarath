@@ -173,6 +173,8 @@
 
     footer: {
       thanks: "Thank you for celebrating with us",
+      invitedByLabel: "Invited By",
+      invitedBy: "DANDANGI VEERRAJU & HEPSIBA",
       copyright: "© 2026 Supriya & Sarath · Handcrafted with love by InviteStory",
     },
 
@@ -293,6 +295,8 @@
 
     footer: {
       thanks: "మా ఆనందంలో పాలుపంచుకున్నందుకు ధన్యవాదాలు",
+      invitedByLabel: "ఆహ్వానించువారు",
+      invitedBy: "దండాంగి వీర్రాజు & హెప్సిబా",
       copyright: "© 2026 సుప్రియ & శరత్ · హ్యాండ్‌క్రాఫ్టెడ్ విత్ లవ్ బై InviteStory",
     },
 
