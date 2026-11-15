@@ -4,6 +4,13 @@
  */
 
 window.WEDDING_DATA = {
+  // Sacred Bible verse displayed at the top
+  verse: {
+    reference: "MARK 10:9",
+    text: "“Therefore what God has joined together, let no one separate.”",
+  },
+  saveTheDate: "Save the Date",
+
   couple: {
     bride: "Supriya",
     groom: "Sarath",
