@@ -25,26 +25,29 @@ window.WEDDING_DATA = {
     bodyGroom: "./editable/assets/body-groom.png",
   },
 
+  storyEyebrow: "Wedding Events",
+  storyTitle: "The Road to Forever",
+
   story: [
     {
-      title: "First Meeting",
-      date: "The Beginning",
-      text: "Two souls crossed paths, and what began as a simple conversation quietly turned into something truly special. Neither of us knew then that we had just found our forever.",
+      title: "PELLIKODUKU",
+      date: "25th November 2026",
+      text: "Location: At Our Residence",
     },
     {
-      title: "Growing Together",
-      date: "The Journey",
-      text: "Years of shared laughter, quiet understandings, endless conversations, and cheering for each other through every high and low. A bond that easily became home.",
+      title: "HALDI",
+      date: "27th November 2026",
+      text: "Time: From Morning\nLocation: Horizontal Villas, Rjy",
     },
     {
-      title: "The Proposal",
-      date: "A Promise Made",
-      text: "With hearts full of love and faith in tomorrow, Sarath asked the question that would change everything — and Supriya said yes with all her heart.",
+      title: "SANGEETH",
+      date: "27th November 2026",
+      text: "Time: From Evening\nLocation: Horizontal Villas, Rjy",
     },
     {
-      title: "The Wedding",
-      date: "November 2026",
-      text: "And now, the most beautiful chapter of our lives begins. We would be honoured to have you with us to celebrate our wedding day and bless our union.",
+      title: "WEDDING",
+      date: "30th November 2026",
+      text: "Time: Starts from 10:00 AM\nLocation: Surya Gardens, Rajamahendravaram",
     },
   ],
 
