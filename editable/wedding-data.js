@@ -70,27 +70,27 @@ window.WEDDING_DATA = {
   gallery: [
     {
       src: "./editable/assets/gallery-1.png",
-      alt: "Golden hour walk through the garden",
+      alt: "Hand in hand along the forest trail",
     },
     {
       src: "./editable/assets/gallery-2.png",
-      alt: "Dancing under the string lights",
+      alt: "Embracing amidst the lush tea hills",
     },
     {
       src: "./editable/assets/gallery-3.png",
-      alt: "The ring — a promise for forever",
+      alt: "Adventurous moments together on an elephant ride",
     },
     {
       src: "./editable/assets/gallery-4.png",
-      alt: "Quiet moments together",
+      alt: "Standing hand in hand before the grand church",
     },
     {
       src: "./editable/assets/gallery-5.png",
-      alt: "Celebrating love and togetherness",
+      alt: "A tender moment together with the promise of forever",
     },
     {
       src: "./editable/assets/gallery-6.png",
-      alt: "Sparkler dreams and smiles",
+      alt: "Joy, laughter, and open arms celebrating our journey",
     },
   ],
 
